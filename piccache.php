@@ -151,10 +151,12 @@ class FetchLinkData
      * @var FetchHeader[]
      */
     public array $headers;
+    public ?int $status_code;
 
-    public function __construct(bool $fetched, array $headers = [])
+    public function __construct(bool $fetched, ?int $status_code, array $headers = [])
     {
         $this->fetched = $fetched;
+        $this->status_code = $status_code;
         $this->headers = $headers;
     }
 }
@@ -358,19 +360,19 @@ class Cache
         if ($this->isRedgifs($url)) {
             $url = $this->get_redgifs_url_from_m3u8($url);
             if (!$url) {
-                return new FetchLinkData(false);
+                return new FetchLinkData(false, null);
             }
         }
         if ($this->isVidble($url)) {
             $url = $this->get_vidble_url($url);
             if (!$url) {
-                return new FetchLinkData(false);
+                return new FetchLinkData(false, null);
             }
         }
         if ($this->isImgur($url)) {
             $url = $this->get_imgur_url($url);
             if (!$url) {
-                return new FetchLinkData(false);
+                return new FetchLinkData(false, null);
             }
         }
 
@@ -398,6 +400,7 @@ class Cache
         curl_setopt($curl, CURLOPT_HEADERFUNCTION, $headersDumper);
 
         $result = curl_exec($curl);
+        $status_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
         fclose($fp);
 
@@ -406,7 +409,7 @@ class Cache
             chmod($file_name, Config::get_permissions());
         }
 
-        return new FetchLinkData($result, $headers);
+        return new FetchLinkData($result, $status_code ? intval($status_code) : null, $headers);
     }
 
     private function get_redgifs_url_from_api(string $url): ?string
@@ -531,39 +534,39 @@ class Cache
         }
 
         $file_name = $this->get_filename($url);
-        [$content_fetched, $headers] = $this->fetch_link_content($url, $file_name);
-        if (!$content_fetched) {
+        $data = $this->fetch_link_content($url, $file_name);
+        if (!$data->fetched) {
             unlink($file_name);
 
-            $response_code = -1;
-            if ($headers) {
-                preg_match('/\d{3}/', $headers[0], $matches);
-                if ($matches) {
-                    $response_code = intval($matches[0]);
-                }
+            if ($data->status_code === null || $data->status_code === 404) {
+                return new FetchHit(true, false, headers: $data->headers, comment: 'Got 404');
             }
 
-            if ($response_code == -1 || $response_code == 404) {
-                return new FetchHit(true, false, headers: $headers, comment: 'Got 404');
-            }
-
-            return new FetchHit(false, false, headers: $headers, comment: 'Could not get media content');
-        }
-        if ($this->content_type_contains($headers, 'text/html')) {
-            unlink($file_name);
-            return new FetchHit(false, true, headers: $headers, comment: 'Response has HTML content type');
-        }
-        if (preg_match("#^\s*<!doctype html>.*#i", $content_fetched)) {
-            unlink($file_name);
-            return new FetchHit(false, true, headers: $headers, comment: 'Response was HTML');
+            return new FetchHit(false, false, headers: $data->headers, comment: 'Could not get media content');
         }
 
         if (filesize($file_name) === 0) {
             unlink($file_name);
-            return new FetchHit(false, true, $file_name, $headers, 'Content size is empty');
+            return new FetchHit(false, true, $file_name, $data->headers, 'Content size is empty');
+        }
+        
+        if ($this->content_type_contains($data->headers, 'text/html')) {
+            unlink($file_name);
+            return new FetchHit(false, true, headers: $data->headers, comment: 'Response has HTML content type');
         }
 
-        return new FetchHit(true, true, $file_name, $headers, 'Added to cache');
+        if (file_exists($file_name)) {
+            $file_object = new SplFileObject($file_name, 'r');
+            $line = $file_object->current();
+            $file_object = null; // Close object
+            
+            if ($line && preg_match("#^\s*<!doctype html>.*#i", $line)) {
+                unlink($file_name);
+                return new FetchHit(false, true, headers: $data->headers, comment: 'Response was HTML');
+            }
+        }
+
+        return new FetchHit(true, true, $file_name, $data->headers, 'Added to cache');
     }
 
     public function get_cached_data(string $url): CacheHit
