@@ -378,8 +378,8 @@ class Cache
         $headersDumper = function ($ch, $header) use (&$headers) {
             $len = strlen($header);
 
-            $header_parts = explode(':', $header . 2);
-            if (count($header) < 2) { // ignore invalid headers
+            $header_parts = explode(':', $header, 2);
+            if (count($header_parts) < 2) { // ignore invalid headers
                 return $len;
             }
             $headers[] = new FetchHeader(trim($header_parts[0]), trim($header_parts[1]));
