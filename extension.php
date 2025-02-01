@@ -397,7 +397,7 @@ EOT
         }
 
         $params = array(
-                'url' => base64_encode($url),
+                'url' => $this->safe_encode_base64($url),
                 'code' => $this->settings->getImageCacheAccessToken()
         );
         return $image_cache_url . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
@@ -409,7 +409,7 @@ EOT
             return true;
         }
         $params = array(
-                'url' => base64_encode($url),
+                'url' => $this->safe_encode_base64($url),
                 'code' => $this->settings->getImageCacheAccessToken()
         );
         $cache_url = $this->settings->getImageCacheUrl() . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
@@ -641,5 +641,10 @@ EOT
                 $source->setAttribute("type", "video/mp2t");
             }
         }
+    }
+
+    private function safe_encode_base64(string $value): string
+    {
+        return strtr(base64_encode($value), '+/=', '-_.');
     }
 }
