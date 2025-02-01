@@ -638,7 +638,7 @@ EOT
     {
         if ($source->hasAttribute("type")) {
             if ($source->getAttribute("type") === "application/x-mpegURL") {
-                $source->setAttribute("type", "video/mpeg");
+                $source->setAttribute("type", "video/mp2t");
             }
         }
     }
