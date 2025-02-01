@@ -4,8 +4,7 @@ namespace ImageCache;
 
 class Settings
 {
-    const DEFAULT_CACHE_URL = "https://example.com/pic?url=";
-    const DEFAULT_CACHE_POST_URL = "https://example.com/prepare";
+    const DEFAULT_CACHE_URL = "https://example.com/pic";
     const DEFAULT_CACHE_DISABLED_URL = "";
     const DEFAULT_RECACHE_URL = "";
     const DEFAULT_CACHE_ACCESS_TOKEN = "";
@@ -29,15 +28,6 @@ class Settings
         }
 
         return self::DEFAULT_CACHE_URL;
-    }
-
-    public function getImageCachePostUrl(): string
-    {
-        if (array_key_exists('image_cache_post_url', $this->settings)) {
-            return (string)$this->settings['image_cache_post_url'];
-        }
-
-        return self::DEFAULT_CACHE_POST_URL;
     }
 
     public function getImageCacheAccessToken(): string

@@ -1,8 +1,8 @@
 {
 	"name": "Image Cache",
 	"author": "Rakambda",
-	"description": "Cache feed images on your own facility or Cloudflare cache.",
-	"version": 0.8,
+	"description": "Cache feed images on your own facility.",
+	"version": 1.0,
 	"entrypoint": "ImageCache",
 	"type": "user"
 }

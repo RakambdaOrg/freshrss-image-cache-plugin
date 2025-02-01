@@ -1,12 +1,19 @@
 <form action="<?php echo _url('extension', 'configure', 'e', urlencode($this->getName())); ?>" method="post">
 	<input type="hidden" name="_csrf" value="<?php echo FreshRSS_Auth::csrfToken(); ?>" />
-	<h3>Display cached settings</h3>
+	<h3>Cache host settings</h3>
 	<div class="form-group">
 		<label class="group-name" for="image_cache_url"><?php echo _t('ext.imagecache.cache_url'); ?></label>
 		<div class="group-controls">
 			<input type="url" name="image_cache_url" id="image_cache_url" value="<?php echo $this->settings->getImageCacheUrl(); ?>">
 		</div>
 	</div>
+    <div class="form-group">
+        <label class="group-name" for="image_cache_access_token"><?php echo _t('ext.imagecache.access_token'); ?></label>
+        <div class="group-controls">
+            <input type="text" name="image_cache_access_token" id="image_cache_access_token" value="<?php echo $this->settings->getImageCacheAccessToken(); ?>">
+        </div>
+    </div>
+    <h3>Caching settings</h3>
     <div class="form-group">
         <label class="group-name" for="image_recache_url"><?php echo _t('ext.imagecache.image_recache_url'); ?></label>
         <div class="group-controls">
@@ -17,12 +24,6 @@
         <label class="group-name" for="image_cache_disabled_url"><?php echo _t('ext.imagecache.cache_disabled_url'); ?></label>
         <div class="group-controls">
             <input type="text" name="image_cache_disabled_url" id="image_cache_disabled_url" value="<?php echo $this->settings->getImageDisabledUrl(); ?>">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="group-name" for="video_default_volume"><?php echo _t('ext.imagecache.video_default_volume'); ?></label>
-        <div class="group-controls">
-            <input type="number" step="0.01" min="0" max="1" name="video_default_volume" id="video_default_volume" value="<?php echo $this->settings->getVideoDefaultVolume(); ?>">
         </div>
     </div>
     <div class="form-group">
@@ -43,25 +44,19 @@
             <input type="number" step="1" min="1" max="999999" name="max_cache_elements" id="max_cache_elements" value="<?php echo $this->settings->getMaxCacheElements(); ?>">
         </div>
     </div>
-	<h3>Cache host settings</h3>
-	<div class="form-group">
-		<label class="group-name" for="image_cache_post_url"><?php echo _t('ext.imagecache.post_url'); ?></label>
-		<div class="group-controls">
-			<input type="url" name="image_cache_post_url" id="image_cache_post_url" value="<?php echo $this->settings->getImageCachePostUrl(); ?>">
-		</div>
-	</div>
-	<div class="form-group">
-		<label class="group-name" for="image_cache_access_token"><?php echo _t('ext.imagecache.access_token'); ?></label>
-		<div class="group-controls">
-			<input type="text" name="image_cache_access_token" id="image_cache_access_token" value="<?php echo $this->settings->getImageCacheAccessToken(); ?>">
-		</div>
-	</div>
-	<div class="form-group">
-		<label class="group-name" for="image_cache_remove_wrong_tag"><?php echo _t('ext.imagecache.remove_wrong_tag'); ?></label>
-		<div class="group-controls">
-			<input type="text" name="image_cache_remove_wrong_tag" id="image_cache_remove_wrong_tag" value="<?php echo $this->settings->isRemoveWrongTag(); ?>">
-		</div>
-	</div>
+    <h3>Display settings</h3>
+    <div class="form-group">
+        <label class="group-name" for="video_default_volume"><?php echo _t('ext.imagecache.video_default_volume'); ?></label>
+        <div class="group-controls">
+            <input type="number" step="0.01" min="0" max="1" name="video_default_volume" id="video_default_volume" value="<?php echo $this->settings->getVideoDefaultVolume(); ?>">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="group-name" for="image_cache_remove_wrong_tag"><?php echo _t('ext.imagecache.remove_wrong_tag'); ?></label>
+        <div class="group-controls">
+            <input type="text" name="image_cache_remove_wrong_tag" id="image_cache_remove_wrong_tag" value="<?php echo $this->settings->isRemoveWrongTag(); ?>">
+        </div>
+    </div>
 	<div class="form-group form-actions">
 		<div class="group-controls">
 			<button type="submit" class="btn btn-important"><?php echo _t('gen.action.submit'); ?></button>
