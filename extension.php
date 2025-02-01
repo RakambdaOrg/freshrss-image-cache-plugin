@@ -76,15 +76,15 @@ EOT
 
         if (Minz_Request::isPost()) {
             $configuration = [
-                'image_cache_url' => Minz_Request::paramString('image_cache_url'),
-                'image_cache_post_url' => Minz_Request::paramString('image_cache_post_url'),
-                'image_cache_access_token' => Minz_Request::paramString('image_cache_access_token'),
-                'image_cache_disabled_url' => Minz_Request::paramString('image_cache_disabled_url'),
-                'image_recache_url' => Minz_Request::paramString('image_recache_url'),
-                'video_default_volume' => Minz_Request::paramString('video_default_volume'),
-                'upload_retry_count' => Minz_Request::paramInt('upload_retry_count'),
-                'max_cache_elements' => Minz_Request::paramInt('max_cache_elements'),
-                'remove_wrong_tag' => Minz_Request::paramBoolean('remove_wrong_tag'),
+                    'image_cache_url' => Minz_Request::paramString('image_cache_url'),
+                    'image_cache_post_url' => Minz_Request::paramString('image_cache_post_url'),
+                    'image_cache_access_token' => Minz_Request::paramString('image_cache_access_token'),
+                    'image_cache_disabled_url' => Minz_Request::paramString('image_cache_disabled_url'),
+                    'image_recache_url' => Minz_Request::paramString('image_recache_url'),
+                    'video_default_volume' => Minz_Request::paramString('video_default_volume'),
+                    'upload_retry_count' => Minz_Request::paramInt('upload_retry_count'),
+                    'max_cache_elements' => Minz_Request::paramInt('max_cache_elements'),
+                    'remove_wrong_tag' => Minz_Request::paramBoolean('remove_wrong_tag'),
             ];
             $this->setUserConfiguration($configuration);
         }
@@ -125,9 +125,9 @@ EOT
 
         $doc = self::loadContentAsDOM($content);
         self::handleImages($doc,
-            "display",
-            [$this, "getCachedUrl"],
-            [$this, "getCachedSetUrl"]
+                "display",
+                [$this, "getCachedUrl"],
+                [$this, "getCachedSetUrl"]
         );
 
         return $doc->saveHTML();
@@ -146,9 +146,9 @@ EOT
 
         $doc = self::loadContentAsDOM($content);
         self::handleImages($doc,
-            "insert",
-            [$this, "uploadUrl"],
-            [$this, "uploadSetUrls"]
+                "insert",
+                [$this, "uploadUrl"],
+                [$this, "uploadSetUrls"]
         );
     }
 
@@ -192,7 +192,7 @@ EOT
 
                     if ($this->isVideoLink($src)) {
                         $this->appendVideo($doc, $image, $src, $result);
-                        if ($this->settings->isRemoveWrongTag()){
+                        if ($this->settings->isRemoveWrongTag()) {
                             $image->parentNode->removeChild($image);
                         }
                     }
@@ -396,7 +396,11 @@ EOT
         }
 
         $encoded_url = rawurlencode($url);
-        return $image_cache_url . $encoded_url;
+        $params = array(
+                'url' => $encoded_url,
+                'code' => $this->settings->getImageCacheAccessToken()
+        );
+        return $image_cache_url . '?' . http_build_query($params);
     }
 
     private function isUrlCached(string $url): bool
@@ -405,7 +409,11 @@ EOT
             return true;
         }
         $encoded_url = rawurlencode($url);
-        $cache_url = $this->settings->getImageCacheUrl() . $encoded_url;
+        $params = array(
+                'url' => $encoded_url,
+                'code' => $this->settings->getImageCacheAccessToken()
+        );
+        $cache_url = $this->settings->getImageCacheUrl() . '?' . http_build_query($params);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $cache_url);
@@ -437,8 +445,7 @@ EOT
         $max_tries = 1 + $this->settings->getUploadRetryCount();
         for ($i = 1; $i <= $max_tries; $i++) {
             $cached = self::postUrl($this->settings->getImageCachePostUrl(), [
-                "access_token" => $this->settings->getImageCacheAccessToken(),
-                "url" => $to_cache_cache_url
+                    "url" => $to_cache_cache_url
             ]);
             Minz_Log::debug("ImageCache: Try $i, $to_cache_cache_url cache result : $cached");
             if ($cached) {
@@ -459,26 +466,29 @@ EOT
         $curl = curl_init();
         $headers = [];
 
+        $token = $this->settings->getImageCacheAccessToken();
+
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json;charset='utf-8'",
-            "Content-Length: $dataLength",
-            "Accept: application/json"
+                "Content-Type: application/json;charset='utf-8'",
+                "Content-Length: $dataLength",
+                "Accept: application/json",
+                "Authorization: Bearer $token"
         ]);
         curl_setopt($curl, CURLOPT_HEADERFUNCTION,
-            function ($ch, $header) use (&$headers) {
-                $len = strlen($header);
-                $header = explode(':', $header, 2);
-                // ignore invalid headers
-                if (count($header) < 2) {
+                function ($ch, $header) use (&$headers) {
+                    $len = strlen($header);
+                    $header = explode(':', $header, 2);
+                    // ignore invalid headers
+                    if (count($header) < 2) {
+                        return $len;
+                    }
+
+                    $headers[strtolower(trim($header[0]))][] = trim($header[1]);
                     return $len;
                 }
-
-                $headers[strtolower(trim($header[0]))][] = trim($header[1]);
-                return $len;
-            }
         );
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
@@ -547,7 +557,7 @@ EOT
         if (isset($parsed_url['host'])) {
             $host = $parsed_url['host'];
             if (str_contains($host, 'redgifs.com')
-                || str_contains($host, 'vidble.com')
+                    || str_contains($host, 'vidble.com')
             ) {
                 return true;
             }
@@ -571,7 +581,7 @@ EOT
         if (isset($parsed_url['host'])) {
             $host = $parsed_url['host'];
             if (str_contains($host, 'imgur.com')
-                || str_contains($host, 'i.redd.it')
+                    || str_contains($host, 'i.redd.it')
             ) {
                 return true;
             }
