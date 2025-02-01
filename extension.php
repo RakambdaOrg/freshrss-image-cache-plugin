@@ -636,7 +636,7 @@ EOT
 
     private function overrideVideoSourceAttributes(DOMElement $source): void
     {
-        if (!$source->hasAttribute("type")) {
+        if ($source->hasAttribute("type")) {
             if ($source->getAttribute("type") === "application/x-mpegURL") {
                 $source->setAttribute("type", "video/mpeg");
             }
