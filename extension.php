@@ -272,6 +272,7 @@ EOT
                     if ($result) {
                         $source->setAttribute("previous-src", $src);
                         $source->setAttribute("src", $result);
+                        $this->overrideVideoSourceAttributes($source);
                         $this->addDefaultVideoAttributes($video);
                         $this->addClass($video, "cache-image");
                         Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
@@ -352,6 +353,7 @@ EOT
 
             $video = $doc->createElement('video');
             $this->addDefaultVideoAttributes($video);
+            $this->overrideVideoSourceAttributes($source);
             $video->appendChild($source);
 
             $this->appendAfter($node, $this->wrapElement($doc, $video));
@@ -628,6 +630,15 @@ EOT
         if (!$video->hasAttribute("muted")) {
             if ($this->getDefaultVolume() <= 0) {
                 $video->setAttribute('muted', 'true');
+            }
+        }
+    }
+
+    private function overrideVideoSourceAttributes(DOMElement $source): void
+    {
+        if (!$source->hasAttribute("type")) {
+            if ($source->getAttribute("type") === "application/x-mpegURL") {
+                $source->setAttribute("type", "video/mpeg");
             }
         }
     }
