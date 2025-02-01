@@ -395,12 +395,11 @@ EOT
             $this->uploadUrl($url);
         }
 
-        $encoded_url = rawurlencode($url);
         $params = array(
-                'url' => $encoded_url,
+                'url' => $url,
                 'code' => $this->settings->getImageCacheAccessToken()
         );
-        return $image_cache_url . '?' . http_build_query($params);
+        return $image_cache_url . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
     }
 
     private function isUrlCached(string $url): bool
@@ -408,12 +407,11 @@ EOT
         if ($this->isCachedOnRemote($url)) {
             return true;
         }
-        $encoded_url = rawurlencode($url);
         $params = array(
-                'url' => $encoded_url,
+                'url' => $url,
                 'code' => $this->settings->getImageCacheAccessToken()
         );
-        $cache_url = $this->settings->getImageCacheUrl() . '?' . http_build_query($params);
+        $cache_url = $this->settings->getImageCacheUrl() . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $cache_url);
