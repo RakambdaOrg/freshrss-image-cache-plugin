@@ -96,7 +96,7 @@ EOT
      */
     public function content_modification_hook(FreshRSS_Entry $entry): FreshRSS_Entry
     {
-        $entry->_content(self::swapUrls($entry->content(), $entry->link()));
+        $entry->_content(self::swapUrls($entry->content(), $entry));
         return $entry;
     }
 
@@ -107,7 +107,7 @@ EOT
      */
     public function image_upload_hook(FreshRSS_Entry $entry): FreshRSS_Entry
     {
-        self::uploadUrls($entry->content(), $entry->link());
+        self::uploadUrls($entry->content(), $entry);
         return $entry;
     }
 
@@ -116,14 +116,14 @@ EOT
      * @throws Minz_ConfigurationParamException
      * @throws Minz_PermissionDeniedException
      */
-    private function swapUrls(string $content, string $originUrl): string
+    private function swapUrls(string $content, FreshRSS_Entry $entry): string
     {
         if (empty($content)) {
             return $content;
         }
 
         $doc = self::loadContentAsDOM($content);
-        self::handleImages($doc, $originUrl,
+        self::handleImages($doc, $entry,
                 "display",
                 [$this, "getCachedUrl"],
                 [$this, "getCachedSetUrl"]
@@ -137,14 +137,14 @@ EOT
      * @throws Minz_ConfigurationParamException
      * @throws Minz_PermissionDeniedException
      */
-    private function uploadUrls(string $content, string $originUrl): void
+    private function uploadUrls(string $content, FreshRSS_Entry $entry): void
     {
         if (empty($content)) {
             return;
         }
 
         $doc = self::loadContentAsDOM($content);
-        self::handleImages($doc, $originUrl,
+        self::handleImages($doc, $entry,
                 "insert",
                 [$this, "uploadUrl"],
                 [$this, "uploadSetUrls"]
@@ -166,7 +166,7 @@ EOT
      * @throws Minz_ConfigurationParamException
      * @throws Minz_PermissionDeniedException
      */
-    private function handleImages(DOMDocument $doc, string $originUrl, string $callSource, callable $singleElementCallback, callable $elementSetCallback): void
+    private function handleImages(DOMDocument $doc, FreshRSS_Entry $entry, string $callSource, callable $singleElementCallback, callable $elementSetCallback): void
     {
         Minz_Log::debug("ImageCache[$callSource]: Scanning new document");
 
@@ -183,7 +183,7 @@ EOT
                 }
 
                 Minz_Log::debug("ImageCache[$callSource]: Found image $src");
-                $result = $singleElementCallback($src, $originUrl);
+                $result = $singleElementCallback($src, $entry);
                 if ($result) {
                     $image->setAttribute("previous-src", $src);
                     $image->setAttribute("src", $result);
@@ -201,8 +201,8 @@ EOT
                 }
             }
             if ($image->hasAttribute("srcset")) {
-                $elementSetCall = function ($src) use ($elementSetCallback, $originUrl) {
-                    return $elementSetCallback($src, $originUrl);
+                $elementSetCall = function ($src) use ($elementSetCallback, $entry) {
+                    return $elementSetCallback($src, $entry);
                 };
                 $srcSet = $image->getAttribute("srcset");
                 Minz_Log::debug("ImageCache[$callSource]: Found image set $srcSet");
@@ -232,7 +232,7 @@ EOT
                 }
 
                 Minz_Log::debug("ImageCache[$callSource]: Found video src $src");
-                $result = $singleElementCallback($src, $originUrl);
+                $result = $singleElementCallback($src, $entry);
                 if ($result) {
                     $video->setAttribute("previous-src", $src);
                     $video->setAttribute("src", $result);
@@ -251,7 +251,7 @@ EOT
                 }
 
                 Minz_Log::debug("ImageCache[$callSource]: Found video poster $poster");
-                $result = $singleElementCallback($poster, $originUrl);
+                $result = $singleElementCallback($poster, $entry);
                 if ($result) {
                     $video->setAttribute("previous-poster", $poster);
                     $video->setAttribute("poster", $result);
@@ -274,7 +274,7 @@ EOT
                     }
 
                     Minz_Log::debug("ImageCache[$callSource]: Found video source $src");
-                    $result = $singleElementCallback($src, $originUrl);
+                    $result = $singleElementCallback($src, $entry);
                     if ($result) {
                         $source->setAttribute("previous-src", $src);
                         $source->setAttribute("src", $result);
@@ -305,7 +305,7 @@ EOT
             }
 
             Minz_Log::debug("ImageCache[$callSource]: Found link $href");
-            $result = $singleElementCallback($href, $originUrl);
+            $result = $singleElementCallback($href, $entry);
             if (!$result) {
                 Minz_Log::debug("ImageCache[$callSource]: Failed replacing link");
                 continue;
@@ -382,42 +382,44 @@ EOT
     /**
      * @throws Minz_PermissionDeniedException
      */
-    private function getCachedSetUrl(array $matches, string $originUrl): string
+    private function getCachedSetUrl(array $matches, FreshRSS_Entry $entry): string
     {
-        return str_replace($matches[1], self::getCachedUrl($matches[1], $originUrl), $matches[0]);
+        return str_replace($matches[1], self::getCachedUrl($matches[1], $entry), $matches[0]);
     }
 
     /**
      * @throws Minz_PermissionDeniedException
      */
-    private function getCachedUrl(string $url, string $originUrl): string
+    private function getCachedUrl(string $url, FreshRSS_Entry $entry): string
     {
         $image_cache_url = $this->settings->getImageCacheUrl();
         if (str_starts_with($url, $image_cache_url)) {
             Minz_Log::debug("ImageCache: URL $url already starts with $image_cache_url");
             return $url;
         }
-        if ($this->isRecache($url) && !$this->isUrlCached($url, $originUrl)) {
+        if ($this->isRecache($url) && !$this->isUrlCached($url, $entry)) {
             Minz_Log::debug("ImageCache: Re-caching $url");
-            $this->uploadUrl($url, $originUrl);
+            $this->uploadUrl($url, $entry);
         }
 
         $params = array(
                 'url' => $this->safe_encode_base64($url),
-                'origin' => $this->safe_encode_base64($originUrl),
+                'origin' => $this->safe_encode_base64($entry->link()),
+                'authors' => $this->safe_encode_base64(json_encode($entry->authors())),
                 'code' => $this->settings->getImageCacheAccessToken()
         );
         return $image_cache_url . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
     }
 
-    private function isUrlCached(string $url, string $originUrl): bool
+    private function isUrlCached(string $url, FreshRSS_Entry $entry): bool
     {
         if ($this->isCachedOnRemote($url)) {
             return true;
         }
         $params = array(
                 'url' => $this->safe_encode_base64($url),
-                'origin' => $this->safe_encode_base64($originUrl),
+                'origin' => $this->safe_encode_base64($entry->link()),
+                'authors' => $this->safe_encode_base64(json_encode($entry->authors())),
                 'code' => $this->settings->getImageCacheAccessToken()
         );
         $cache_url = $this->settings->getImageCacheUrl() . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
@@ -441,15 +443,15 @@ EOT
     /**
      * @throws Minz_PermissionDeniedException
      */
-    private function uploadSetUrls(array $matches, string $originUrl): bool
+    private function uploadSetUrls(array $matches, FreshRSS_Entry $entry): bool
     {
-        return self::uploadUrl($matches[1], $originUrl);
+        return self::uploadUrl($matches[1], $entry);
     }
 
     /**
      * @throws Minz_PermissionDeniedException
      */
-    private function uploadUrl(string $to_cache_cache_url, string $originUrl): bool
+    private function uploadUrl(string $to_cache_cache_url, FreshRSS_Entry $entry): bool
     {
         if ($this->isCachedOnRemote($to_cache_cache_url)) {
             Minz_Log::debug("ImageCache: URL $to_cache_cache_url is already cached on remote");
@@ -459,7 +461,8 @@ EOT
         for ($i = 1; $i <= $max_tries; $i++) {
             $cached = self::postUrl($this->settings->getImageCacheUrl(), [
                     "url" => $to_cache_cache_url,
-                    "origin" => $originUrl,
+                    "origin" => $entry->link(),
+                    "authors" => $entry->authors(),
             ]);
             Minz_Log::debug("ImageCache: Try $i, $to_cache_cache_url cache result : $cached");
             if ($cached) {
