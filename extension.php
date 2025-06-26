@@ -411,7 +411,7 @@ EOT
         return $image_cache_url . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
     }
 
-    private function isUrlCached(string $url, FreshRSS_Entry $entry): bool
+    private function isUrlCached(string $url, FreshRSS_Entry $entry, int $retry = 0): bool
     {
         if ($this->isCachedOnRemote($url)) {
             return true;
@@ -435,6 +435,12 @@ EOT
 
         if ($code == 404) {
             return false;
+        }
+        if ($code == 500) {
+            if ($retry >= 3) {
+                sleep(5);
+                return $this->isUrlCached($url, $entry, $retry + 1);
+            }
         }
         if ($this->isRecache($url)) {
             $this->setCachedOnRemote($url);
