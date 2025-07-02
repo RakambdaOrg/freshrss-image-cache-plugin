@@ -17,13 +17,13 @@
     <div class="form-group">
         <label class="group-name" for="image_recache_url"><?php echo _t('ext.imagecache.image_recache_url'); ?></label>
         <div class="group-controls">
-            <textarea name="image_recache_url" id="image_recache_url"><?php echo $this->settings->getImageRecacheUrl(); ?></textarea>
+            <textarea name="image_recache_url" id="image_recache_url"><?php echo implode(",", $this->settings->getImageRecacheUrl()); ?></textarea>
         </div>
     </div>
     <div class="form-group">
         <label class="group-name" for="image_cache_disabled_url"><?php echo _t('ext.imagecache.cache_disabled_url'); ?></label>
         <div class="group-controls">
-            <textarea name="image_cache_disabled_url" id="image_cache_disabled_url"><?php echo $this->settings->getImageDisabledUrl(); ?></textarea>
+            <textarea name="image_cache_disabled_url" id="image_cache_disabled_url"><?php echo implode(",", $this->settings->getImageDisabledUrl()); ?></textarea>
         </div>
     </div>
     <div class="form-group">
