@@ -39,22 +39,28 @@ class Settings
         return self::DEFAULT_CACHE_ACCESS_TOKEN;
     }
 
-    public function getImageDisabledUrl(): string
+    /**
+     * @return array<string>
+     */
+    public function getImageDisabledUrl(): array
     {
         if (array_key_exists('image_cache_disabled_url', $this->settings)) {
-            return (string)$this->settings['image_cache_disabled_url'];
+            return $this->splitEntries((string)$this->settings['image_cache_disabled_url']);
         }
 
-        return self::DEFAULT_CACHE_DISABLED_URL;
+        return $this->splitEntries(self::DEFAULT_CACHE_DISABLED_URL);
     }
 
-    public function getImageRecacheUrl(): string
+    /**
+     * @return array<string>
+     */
+    public function getImageRecacheUrl(): array
     {
         if (array_key_exists('image_recache_url', $this->settings)) {
-            return (string)$this->settings['image_recache_url'];
+            return $this->splitEntries((string)$this->settings['image_recache_url']);
         }
 
-        return self::DEFAULT_RECACHE_URL;
+        return $this->splitEntries(self::DEFAULT_RECACHE_URL);
     }
 
     public function getVideoDefaultVolume(): float
@@ -100,5 +106,16 @@ class Settings
         }
 
         return self::DEFAULT_REMOVE_WRONG_TAG;
+    }
+
+    /**
+     * @return array<string>
+     */
+    private function splitEntries(string $entries): array
+    {
+        return array_filter(array_map(
+                fn($value): string => trim($value),
+                preg_split("/[,\n]/", $entries)
+        ));
     }
 }

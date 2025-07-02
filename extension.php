@@ -548,12 +548,7 @@ EOT
 
     private function isDisabled(string $src): bool
     {
-        $disabledStr = $this->settings->getImageDisabledUrl();
-        if (!$disabledStr) {
-            return false;
-        }
-
-        $disabledEntries = explode(',', $disabledStr);
+        $disabledEntries = $this->settings->getImageDisabledUrl();
         foreach ($disabledEntries as $disabledEntry) {
             if (str_contains($src, $disabledEntry)) {
                 return true;
@@ -564,12 +559,7 @@ EOT
 
     private function isRecache(string $src): bool
     {
-        $recacheStr = $this->settings->getImageRecacheUrl();
-        if (!$recacheStr) {
-            return false;
-        }
-
-        $recacheEntries = explode(',', $recacheStr);
+        $recacheEntries = $this->settings->getImageRecacheUrl();
         foreach ($recacheEntries as $recacheEntry) {
             if (str_contains($src, $recacheEntry)) {
                 return true;
