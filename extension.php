@@ -77,6 +77,7 @@ EOT
         if (Minz_Request::isPost()) {
             $configuration = [
                     'image_cache_url' => Minz_Request::paramString('image_cache_url'),
+                    'internal_image_cache_url' => Minz_Request::paramString('internal_image_cache_url'),
                     'image_cache_access_token' => Minz_Request::paramString('image_cache_access_token'),
                     'image_cache_disabled_url' => Minz_Request::paramString('image_cache_disabled_url'),
                     'image_recache_url' => Minz_Request::paramString('image_recache_url'),
@@ -422,7 +423,7 @@ EOT
                 'authors' => $this->safe_encode_base64(json_encode($entry->authors())),
                 'code' => $this->settings->getImageCacheAccessToken()
         );
-        $cache_url = $this->settings->getImageCacheUrl() . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
+        $cache_url = $this->settings->getInternalImageCacheUrl() . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $cache_url);
@@ -467,7 +468,7 @@ EOT
         }
         $max_tries = 1 + $this->settings->getUploadRetryCount();
         for ($i = 1; $i <= $max_tries; $i++) {
-            $cached = self::postUrl($this->settings->getImageCacheUrl(), [
+            $cached = self::postUrl($this->settings->getInternalImageCacheUrl(), [
                     "url" => $to_cache_cache_url,
                     "origin" => $entry->link(),
                     "authors" => $entry->authors(),

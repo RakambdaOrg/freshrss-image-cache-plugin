@@ -3,6 +3,7 @@
 return array(
         'imagecache' => array(
                 'cache_url' => 'Cache URL',
+                'internal_cache_url' => 'Cache URL (internal)',
                 'access_token' => 'Access Token',
                 'image_recache_url' => 'Retrying caching for (comma separated or one per line)',
                 'cache_disabled_url' => 'Disabled cache for (comma separated or one per line)',

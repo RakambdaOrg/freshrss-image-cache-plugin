@@ -30,6 +30,15 @@ class Settings
         return self::DEFAULT_CACHE_URL;
     }
 
+    public function getInternalImageCacheUrl(): string
+    {
+        if (array_key_exists('internal_image_cache_url', $this->settings)) {
+            return (string)$this->settings['internal_image_cache_url'];
+        }
+
+        return $this->getImageCacheUrl();
+    }
+
     public function getImageCacheAccessToken(): string
     {
         if (array_key_exists('image_cache_access_token', $this->settings)) {
