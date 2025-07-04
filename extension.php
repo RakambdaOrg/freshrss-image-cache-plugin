@@ -49,7 +49,7 @@ img.cache-image, video.cache-image {
 EOT
         );
 
-        Minz_View::appendStyle($this->getFileUrl($css_file_name, false));
+        Minz_View::appendStyle($this->getFileUrl($css_file_name, isStatic: false));
     }
 
     private function registerScript(): void
@@ -67,7 +67,7 @@ document.getElementById("stream").addEventListener("play", function(e) {
 EOT
         );
 
-        Minz_View::appendScript($this->getFileUrl($script_file_name, false), cond: false, defer: false, async: false);
+        Minz_View::appendScript($this->getFileUrl($script_file_name, isStatic: false), cond: false, defer: false, async: false);
     }
 
     public function handleConfigureAction(): void
