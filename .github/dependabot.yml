@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /
+    assignees:
+      - Rakambda
+    schedule:
+      interval: cron
+      cronjob: 0 7 * * *
+      timezone: Europe/Paris
+    pull-request-branch-name:
+      separator: '-'
