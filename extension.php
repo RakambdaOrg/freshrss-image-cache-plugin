@@ -406,7 +406,7 @@ EOT
         $params = array(
                 'url' => $this->safe_encode_base64($url),
                 'origin' => $this->safe_encode_base64($entry->link()),
-                'authors' => $this->safe_encode_base64(json_encode($this->getAuthors($entry))),
+                'authors' => $this->safe_encode_base64(json_encode($entry->authors())),
                 'code' => $this->settings->getImageCacheAccessToken()
         );
         return $image_cache_url . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
@@ -666,23 +666,5 @@ EOT
     private function safe_encode_base64(string $value): string
     {
         return strtr(base64_encode($value), '+/=', '-_.');
-    }
-
-    /**
-     * @return string[]
-     * @throws Minz_PermissionDeniedException
-     */
-    private function getAuthors(FreshRSS_Entry $entry): array
-    {
-        $authors = $entry->authors(asString: false);
-        if (!$authors) {
-            Minz_Log::debug("ImageCache: No author found for entry, trying feed name");
-            $feed = $entry->feed();
-            if ($feed) {
-                return [$feed->name()];
-            }
-            Minz_Log::warning("ImageCache: No feed found for entry");
-        }
-        return $authors;
     }
 }
