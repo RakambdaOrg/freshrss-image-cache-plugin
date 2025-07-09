@@ -469,9 +469,9 @@ EOT
         $max_tries = 1 + $this->settings->getUploadRetryCount();
         for ($i = 1; $i <= $max_tries; $i++) {
             $cached = self::postUrl($this->settings->getInternalImageCacheUrl(), [
-                    "url" => $to_cache_cache_url,
-                    "origin" => $entry->link(),
-                    "authors" => $entry->authors(),
+                    "url" => $this->safe_encode_base64($to_cache_cache_url),
+                    "origin" => $this->safe_encode_base64($entry->link()),
+                    "authors" => $this->safe_encode_base64(json_encode($entry->authors())),
             ]);
             Minz_Log::debug("ImageCache: Try $i, $to_cache_cache_url cache result : $cached");
             if ($cached) {
