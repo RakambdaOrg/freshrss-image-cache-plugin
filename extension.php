@@ -412,6 +412,9 @@ EOT
         return $image_cache_url . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
     }
 
+    /**
+     * @throws Minz_PermissionDeniedException
+     */
     private function isUrlCached(string $url, FreshRSS_Entry $entry, int $retry = 0): bool
     {
         if ($this->isCachedOnRemote($url)) {
@@ -420,7 +423,7 @@ EOT
         $params = array(
                 'url' => $this->safe_encode_base64($url),
                 'origin' => $this->safe_encode_base64($entry->link()),
-                'authors' => $this->safe_encode_base64(json_encode($entry->authors())),
+                'authors' => $this->safe_encode_base64(json_encode($this->getAuthors($entry))),
                 'code' => $this->settings->getImageCacheAccessToken()
         );
         $cache_url = $this->settings->getInternalImageCacheUrl() . '?' . http_build_query($params, encoding_type: PHP_QUERY_RFC3986);
@@ -471,7 +474,7 @@ EOT
             $cached = self::postUrl($this->settings->getInternalImageCacheUrl(), [
                     "url" => $this->safe_encode_base64($to_cache_cache_url),
                     "origin" => $this->safe_encode_base64($entry->link()),
-                    "authors" => $this->safe_encode_base64(json_encode($entry->authors())),
+                    "authors" => $this->safe_encode_base64(json_encode($this->getAuthors($entry))),
             ]);
             Minz_Log::debug("ImageCache: Try $i, $to_cache_cache_url cache result : $cached");
             if ($cached) {
