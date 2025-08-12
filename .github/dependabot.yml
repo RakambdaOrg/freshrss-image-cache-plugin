@@ -6,7 +6,9 @@ updates:
       - Rakambda
     schedule:
       interval: cron
-      cronjob: 0 7 * * *
+      cronjob: 0 6 * * *
       timezone: Europe/Paris
     pull-request-branch-name:
       separator: '-'
+    cooldown:
+      default-days: 7
