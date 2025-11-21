@@ -209,15 +209,25 @@ EOT
                 Minz_Log::debug("ImageCache[$callSource]: Found image set $srcSet");
                 /** @noinspection RegExpUnnecessaryNonCapturingGroup */
                 $result = preg_replace_callback("/(?:([^\s,]+)(\s*(?:\s+\d+[wx])(?:,\s*)?))/", $elementSetCall, $srcSet);
-                $result = array_filter($result);
-                if ($result) {
-                    $image->setAttribute("previous-srcset", $srcSet);
-                    $image->setAttribute("srcset", $result);
-                    $this->addDefaultImageAttributes($image);
-                    /** @noinspection PhpArrayToStringConversionInspection */
-                    Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
-                } else {
-                    Minz_Log::debug("ImageCache[$callSource]: Failed replacing image set");
+
+                if (is_string($result)) {
+                    $result = [$result];
+                }
+
+                if (is_array($result)) {
+                    $result = array_filter($result);
+                    if ($result) {
+                        $image->setAttribute("previous-srcset", $srcSet);
+                        $image->setAttribute("srcset", $result);
+                        $this->addDefaultImageAttributes($image);
+                        /** @noinspection PhpArrayToStringConversionInspection */
+                        Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
+                    } else {
+                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing image set");
+                    }
+                }
+                else {
+                    Minz_Log::error("ImageCache[$callSource]: Failed replacing image set, got a non array result");
                 }
             }
         }
