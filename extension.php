@@ -217,7 +217,7 @@ EOT
                 if (is_array($result)) {
                     $result = array_filter($result);
                     if ($result) {
-                        $image->setAttribute("previous-srcset", $srcSet);
+                        $image->setAttribute("previous-srcset", join(", ", $srcSet));
                         $image->setAttribute("srcset", $result);
                         $this->addDefaultImageAttributes($image);
                         /** @noinspection PhpArrayToStringConversionInspection */
