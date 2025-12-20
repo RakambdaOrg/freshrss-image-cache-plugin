@@ -204,7 +204,7 @@ EOT
                     }
                 }
 
-                if ($image->hasAttribute("srcset")) {
+                if (false && $image->hasAttribute("srcset")) {
                     $elementSetCall = function ($matches) use ($singleElementCallback, $entry) {
                         $src = trim($matches[0]);
                         $parts = explode(" ", $src, 2);
