@@ -1,33 +1,39 @@
 {
-  "repositories": [{
-    "type": "package",
-    "package": {
-      "name": "freshrss/freshrss",
-      "version": "1.26.3",
-      "dist": {
-        "url": "https://github.com/FreshRSS/FreshRSS/archive/refs/tags/1.26.3.zip",
-        "type": "zip"
-      }
+    "repositories" : [
+        {
+            "type" : "package",
+            "package" : {
+                "name" : "freshrss/freshrss",
+                "version" : "1.27.1",
+                "dist" : {
+                    "url" : "https://github.com/FreshRSS/FreshRSS/archive/refs/tags/1.27.1.zip",
+                    "type" : "zip"
+                }
+            }
+        }
+    ],
+    "require-dev" : {
+        "freshrss/freshrss" : "^1.27",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpstan/extension-installer" : "^1.4",
+        "friendsofphp/php-cs-fixer" : "^3.92"
+    },
+    "autoload-dev" : {
+        "classmap" : [
+            "."
+        ]
+    },
+    "config" : {
+        "allow-plugins" : {
+            "phpstan/extension-installer" : true
+        }
+    },
+    "require" : {
+        "php" : ">=8.1",
+        "ext-dom" : "*",
+        "ext-curl" : "*",
+        "ext-libxml" : "*",
+        "ext-fileinfo" : "*"
     }
-  }],
-  "require-dev": {
-    "phpstan/phpstan": "^2.1",
-    "phpstan/extension-installer": "^1.4",
-    "freshrss/freshrss": "^1.26",
-    "friendsofphp/php-cs-fixer": "^3.76"
-  },
-  "autoload-dev": {
-    "classmap": ["."]
-  },
-  "config": {
-    "allow-plugins": {
-      "phpstan/extension-installer": true
-    }
-  },
-  "require": {
-    "ext-dom": "*",
-    "ext-curl": "*",
-    "ext-libxml": "*",
-    "ext-fileinfo": "*"
-  }
 }

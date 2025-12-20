@@ -58,16 +58,19 @@ EOT
 
         $defaultVolume = $this->getDefaultVolume();
         $this->saveFile($script_file_name, <<<EOT
-document.getElementById("stream").addEventListener("play", function(e) {
-    if(e.target && e.target.nodeName == "video") {
-        e.target.volume = $defaultVolume;
-        console.log("Loaded data ", e);
-    }
-});
+let imageCacheVideo = document.getElementById("stream");
+if(imageCacheVideo) {
+    imageCacheVideo.addEventListener("play", function(e) {
+        if(e.target && e.target.nodeName == "video") {
+            e.target.volume = $defaultVolume;
+            console.log("Loaded data ", e);
+        }
+    });
+}
 EOT
         );
 
-        Minz_View::appendScript($this->getFileUrl($script_file_name, isStatic: false), cond: false, defer: false, async: false);
+        Minz_View::appendScript($this->getFileUrl($script_file_name, isStatic: false), defer: false, async: false);
     }
 
     public function handleConfigureAction(): void
