@@ -214,11 +214,12 @@ EOT
 
                     $srcSet = $image->getAttribute("srcset");
                     Minz_Log::notice("ImageCache[$callSource]: Found image set $srcSet");
-                    if (is_string($srcSet)) {
-                        $srcSet = explode(",", $srcSet);
+                    $srcSetParts = $srcSet;
+                    if (is_string($srcSetParts)) {
+                        $srcSetParts = explode(",", $srcSetParts);
                     }
 
-                    $result = preg_replace_callback("/[^\s,]+\s*\s+\d+[wx]/", $elementSetCall, $srcSet);
+                    $result = preg_replace_callback("/[^\s,]+\s*\s+\d+[wx]/", $elementSetCall, $srcSetParts);
                     if ($result === null) {
                         Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a null result");
                     } else {
@@ -231,8 +232,8 @@ EOT
                             if ($result) {
                                 $newSrcSet = join(", ", $result);
                                 $image->setAttribute("previous-srcset", $srcSet);
-//                                $image->setAttribute("srcset", $newSrcSet);
-//                                $this->addDefaultImageAttributes($image);
+                                $image->setAttribute("srcset", $newSrcSet);
+                                $this->addDefaultImageAttributes($image);
                                 Minz_Log::notice("ImageCache[$callSource]: Replaced with $newSrcSet");
                             } else {
                                 Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set");
