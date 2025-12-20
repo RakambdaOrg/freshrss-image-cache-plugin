@@ -178,158 +178,161 @@ EOT
         $videos = $doc->getElementsByTagName("video");
         $links = $doc->getElementsByTagName("a");
 
-        foreach ($images as $image) {
-            if ($image->hasAttribute("src")) {
-                $src = $image->getAttribute("src");
-                if ($this->isDisabled($src)) {
-                    Minz_Log::debug("ImageCache[$callSource]: Found disabled image $src");
-                    continue;
-                }
-
-                Minz_Log::debug("ImageCache[$callSource]: Found image $src");
-                $result = $singleElementCallback($src, $entry);
-                if ($result) {
-                    $image->setAttribute("previous-src", $src);
-                    $image->setAttribute("src", $result);
-                    $this->addDefaultImageAttributes($image);
-                    Minz_Log::debug("ImageCache[$callSource]: Replaced image with $result");
-
-                    if ($this->isVideoLink($src)) {
-                        $this->appendVideo($doc, $image, $src, $result);
-                        if ($this->settings->isRemoveWrongTag()) {
-                            $image->parentNode->removeChild($image);
-                        }
-                    }
-                } else {
-                    Minz_Log::debug("ImageCache[$callSource]: Failed replacing image");
-                }
-            }
-            if ($image->hasAttribute("srcset")) {
-                $elementSetCall = function ($src) use ($elementSetCallback, $entry) {
-                    return $elementSetCallback($src, $entry);
-                };
-                $srcSet = $image->getAttribute("srcset");
-                Minz_Log::debug("ImageCache[$callSource]: Found image set $srcSet");
-                /** @noinspection RegExpUnnecessaryNonCapturingGroup */
-                $result = preg_replace_callback("/(?:([^\s,]+)(\s*(?:\s+\d+[wx])(?:,\s*)?))/", $elementSetCall, $srcSet);
-
-                if (is_string($result)) {
-                    $result = [$result];
-                }
-
-                if (is_array($result)) {
-                    $result = array_filter($result);
-                    if ($result) {
-                        $image->setAttribute("previous-srcset", join(", ", $srcSet));
-                        $image->setAttribute("srcset", $result);
-                        $this->addDefaultImageAttributes($image);
-                        /** @noinspection PhpArrayToStringConversionInspection */
-                        Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
-                    } else {
-                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing image set");
-                    }
-                }
-                else {
-                    Minz_Log::error("ImageCache[$callSource]: Failed replacing image set, got a non array result");
-                }
-            }
-        }
-
-        foreach ($videos as $video) {
-            Minz_Log::debug("ImageCache[$callSource]: Found video");
-
-            if ($video->hasAttribute("src")) {
-                $src = $video->getAttribute("src");
-                if ($this->isDisabled($src)) {
-                    Minz_Log::debug("ImageCache[$callSource]: Found disabled video $src");
-                    continue;
-                }
-
-                Minz_Log::debug("ImageCache[$callSource]: Found video src $src");
-                $result = $singleElementCallback($src, $entry);
-                if ($result) {
-                    $video->setAttribute("previous-src", $src);
-                    $video->setAttribute("src", $result);
-                    $this->addDefaultVideoAttributes($video);
-                    Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
-                } else {
-                    Minz_Log::debug("ImageCache[$callSource]: Failed replacing video src");
-                }
-            }
-
-            if ($video->hasAttribute("poster")) {
-                $poster = $video->getAttribute("poster");
-                if ($this->isDisabled($poster)) {
-                    Minz_Log::debug("ImageCache[$callSource]: Found disabled video poster $poster");
-                    continue;
-                }
-
-                Minz_Log::debug("ImageCache[$callSource]: Found video poster $poster");
-                $result = $singleElementCallback($poster, $entry);
-                if ($result) {
-                    $video->setAttribute("previous-poster", $poster);
-                    $video->setAttribute("poster", $result);
-                    Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
-                } else {
-                    Minz_Log::debug("ImageCache[$callSource]: Failed replacing video poster");
-                }
-            }
-
-            foreach ($video->childNodes as $source) {
-                if ($source->nodeName == 'source') {
-                    if (!$source->hasAttribute("src")) {
+        try {
+            foreach ($images as $image) {
+                if ($image->hasAttribute("src")) {
+                    $src = $image->getAttribute("src");
+                    if ($this->isDisabled($src)) {
+                        Minz_Log::debug("ImageCache[$callSource]: Found disabled image $src");
                         continue;
                     }
 
-                    $src = $source->getAttribute("src");
+                    Minz_Log::debug("ImageCache[$callSource]: Found image $src");
+                    $result = $singleElementCallback($src, $entry);
+                    if ($result) {
+                        $image->setAttribute("previous-src", $src);
+                        $image->setAttribute("src", $result);
+                        $this->addDefaultImageAttributes($image);
+                        Minz_Log::debug("ImageCache[$callSource]: Replaced image with $result");
+
+                        if ($this->isVideoLink($src)) {
+                            $this->appendVideo($doc, $image, $src, $result);
+                            if ($this->settings->isRemoveWrongTag()) {
+                                $image->parentNode->removeChild($image);
+                            }
+                        }
+                    } else {
+                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing image");
+                    }
+                }
+                if ($image->hasAttribute("srcset")) {
+                    $elementSetCall = function ($src) use ($elementSetCallback, $entry) {
+                        return $elementSetCallback($src, $entry);
+                    };
+                    $srcSet = $image->getAttribute("srcset");
+                    Minz_Log::debug("ImageCache[$callSource]: Found image set $srcSet");
+                    /** @noinspection RegExpUnnecessaryNonCapturingGroup */
+                    $result = preg_replace_callback("/(?:([^\s,]+)(\s*(?:\s+\d+[wx])(?:,\s*)?))/", $elementSetCall, $srcSet);
+
+                    if (is_string($result)) {
+                        $result = [$result];
+                    }
+
+                    if (is_array($result)) {
+                        $result = array_filter($result);
+                        if ($result) {
+                            $image->setAttribute("previous-srcset", join(", ", $srcSet));
+                            $image->setAttribute("srcset", $result);
+                            $this->addDefaultImageAttributes($image);
+                            /** @noinspection PhpArrayToStringConversionInspection */
+                            Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
+                        } else {
+                            Minz_Log::debug("ImageCache[$callSource]: Failed replacing image set");
+                        }
+                    } else {
+                        Minz_Log::error("ImageCache[$callSource]: Failed replacing image set, got a non array result");
+                    }
+                }
+            }
+
+            foreach ($videos as $video) {
+                Minz_Log::debug("ImageCache[$callSource]: Found video");
+
+                if ($video->hasAttribute("src")) {
+                    $src = $video->getAttribute("src");
                     if ($this->isDisabled($src)) {
                         Minz_Log::debug("ImageCache[$callSource]: Found disabled video $src");
                         continue;
                     }
 
-                    Minz_Log::debug("ImageCache[$callSource]: Found video source $src");
+                    Minz_Log::debug("ImageCache[$callSource]: Found video src $src");
                     $result = $singleElementCallback($src, $entry);
                     if ($result) {
-                        $source->setAttribute("previous-src", $src);
-                        $source->setAttribute("src", $result);
-                        $this->overrideVideoSourceAttributes($source);
+                        $video->setAttribute("previous-src", $src);
+                        $video->setAttribute("src", $result);
                         $this->addDefaultVideoAttributes($video);
-                        $this->addClass($video, "cache-image");
                         Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
                     } else {
-                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing video source");
+                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing video src");
+                    }
+                }
+
+                if ($video->hasAttribute("poster")) {
+                    $poster = $video->getAttribute("poster");
+                    if ($this->isDisabled($poster)) {
+                        Minz_Log::debug("ImageCache[$callSource]: Found disabled video poster $poster");
+                        continue;
+                    }
+
+                    Minz_Log::debug("ImageCache[$callSource]: Found video poster $poster");
+                    $result = $singleElementCallback($poster, $entry);
+                    if ($result) {
+                        $video->setAttribute("previous-poster", $poster);
+                        $video->setAttribute("poster", $result);
+                        Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
+                    } else {
+                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing video poster");
+                    }
+                }
+
+                foreach ($video->childNodes as $source) {
+                    if ($source->nodeName == 'source') {
+                        if (!$source->hasAttribute("src")) {
+                            continue;
+                        }
+
+                        $src = $source->getAttribute("src");
+                        if ($this->isDisabled($src)) {
+                            Minz_Log::debug("ImageCache[$callSource]: Found disabled video $src");
+                            continue;
+                        }
+
+                        Minz_Log::debug("ImageCache[$callSource]: Found video source $src");
+                        $result = $singleElementCallback($src, $entry);
+                        if ($result) {
+                            $source->setAttribute("previous-src", $src);
+                            $source->setAttribute("src", $result);
+                            $this->overrideVideoSourceAttributes($source);
+                            $this->addDefaultVideoAttributes($video);
+                            $this->addClass($video, "cache-image");
+                            Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
+                        } else {
+                            Minz_Log::debug("ImageCache[$callSource]: Failed replacing video source");
+                        }
                     }
                 }
             }
-        }
 
-        foreach ($links as $link) {
-            if (!$link->hasAttribute("href")) {
-                continue;
-            }
-            $href = $link->getAttribute("href");
+            foreach ($links as $link) {
+                if (!$link->hasAttribute("href")) {
+                    continue;
+                }
+                $href = $link->getAttribute("href");
 
-            if (!$this->isImageLink($href) && !$this->isVideoLink($href)) {
-                Minz_Log::debug("ImageCache[$callSource]: Found skipped link $href");
-                continue;
-            }
-            if ($this->isDisabled($href)) {
-                Minz_Log::debug("ImageCache[$callSource]: Found disabled link $href");
-                continue;
-            }
+                if (!$this->isImageLink($href) && !$this->isVideoLink($href)) {
+                    Minz_Log::debug("ImageCache[$callSource]: Found skipped link $href");
+                    continue;
+                }
+                if ($this->isDisabled($href)) {
+                    Minz_Log::debug("ImageCache[$callSource]: Found disabled link $href");
+                    continue;
+                }
 
-            Minz_Log::debug("ImageCache[$callSource]: Found link $href");
-            $result = $singleElementCallback($href, $entry);
-            if (!$result) {
-                Minz_Log::debug("ImageCache[$callSource]: Failed replacing link");
-                continue;
-            }
+                Minz_Log::debug("ImageCache[$callSource]: Found link $href");
+                $result = $singleElementCallback($href, $entry);
+                if (!$result) {
+                    Minz_Log::debug("ImageCache[$callSource]: Failed replacing link");
+                    continue;
+                }
 
-            if ($this->isVideoLink($href)) {
-                $this->appendVideo($doc, $link, $href, $result);
-            } else {
-                $this->appendImage($doc, $link, $href, $result);
+                if ($this->isVideoLink($href)) {
+                    $this->appendVideo($doc, $link, $href, $result);
+                } else {
+                    $this->appendImage($doc, $link, $href, $result);
+                }
             }
+        } catch (Exception $e) {
+            Minz_Log::error("ImageCache[$callSource]: Unhandled exception, failed to handle images $e");
         }
 
         Minz_Log::debug("ImageCache[$callSource]: Done scanning document");
