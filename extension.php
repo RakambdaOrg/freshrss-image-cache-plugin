@@ -207,31 +207,40 @@ EOT
                 }
 
                 if ($image->hasAttribute("srcset")) {
-                    $elementSetCall = function ($src) use ($elementSetCallback, $entry) {
-                        return $elementSetCallback($src, $entry);
+                    $elementSetCall = function ($src) use ($singleElementCallback, $entry) {
+                        $src = trim($src);
+                        $parts = explode(" ", $src, 2);
+                        $newUrl = $singleElementCallback($parts[0], $entry);
+                        return join(" ", [$newUrl, $parts[1]]);
                     };
+
                     $srcSet = $image->getAttribute("srcset");
                     Minz_Log::notice("ImageCache[$callSource]: Found image set $srcSet");
-                    /** @noinspection RegExpUnnecessaryNonCapturingGroup */
-                    $result = preg_replace_callback("/(?:([^\s,]+)(\s*(?:\s+\d+[wx])(?:,\s*)?))/", $elementSetCall, $srcSet);
-
-                    if (is_string($result)) {
-                        $result = [$result];
+                    if (is_string($srcSet)) {
+                        $srcSet = explode(",", $srcSet);
                     }
 
-                    if (is_array($result)) {
-                        $result = array_filter($result);
-                        if ($result) {
-                            $image->setAttribute("previous-srcset", join(", ", $srcSet));
-                            $image->setAttribute("srcset", $result);
-                            $this->addDefaultImageAttributes($image);
-                            /** @noinspection PhpArrayToStringConversionInspection */
-                            Minz_Log::notice("ImageCache[$callSource]: Replaced with $result");
-                        } else {
-                            Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set");
-                        }
+                    $result = preg_replace_callback("/[^\s,]+\s*\s+\d+[wx]/", $elementSetCall, $srcSet);
+                    if ($result === null) {
+                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a null result");
                     } else {
-                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a non array result");
+                        if (is_string($result)) {
+                            $result = [$result];
+                        }
+
+                        if (is_array($result)) {
+                            $result = array_filter($result);
+                            if ($result) {
+                                $image->setAttribute("previous-srcset", $srcSet);
+                                $image->setAttribute("srcset", join(", ", $result));
+                                $this->addDefaultImageAttributes($image);
+                                Minz_Log::notice("ImageCache[$callSource]: Replaced with $result");
+                            } else {
+                                Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set");
+                            }
+                        } else {
+                            Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a non array result");
+                        }
                     }
                 }
             }
