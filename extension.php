@@ -129,8 +129,7 @@ EOT
         $doc = self::loadContentAsDOM($content);
         self::handleImages($doc, $entry,
                 "display",
-                [$this, "getCachedUrl"],
-                [$this, "getCachedSetUrl"]
+                [$this, "getCachedUrl"]
         );
 
         return $doc->saveHTML();
@@ -150,8 +149,7 @@ EOT
         $doc = self::loadContentAsDOM($content);
         self::handleImages($doc, $entry,
                 "insert",
-                [$this, "uploadUrl"],
-                [$this, "uploadSetUrls"]
+                [$this, "uploadUrl"]
         );
     }
 
@@ -170,7 +168,7 @@ EOT
      * @throws Minz_ConfigurationParamException
      * @throws Minz_PermissionDeniedException
      */
-    private function handleImages(DOMDocument $doc, FreshRSS_Entry $entry, string $callSource, callable $singleElementCallback, callable $elementSetCallback): void
+    private function handleImages(DOMDocument $doc, FreshRSS_Entry $entry, string $callSource, callable $singleElementCallback): void
     {
         Minz_Log::notice("ImageCache[$callSource]: Scanning new document");
 
@@ -207,8 +205,8 @@ EOT
                 }
 
                 if ($image->hasAttribute("srcset")) {
-                    $elementSetCall = function ($src) use ($singleElementCallback, $entry) {
-                        $src = trim($src);
+                    $elementSetCall = function ($matches) use ($singleElementCallback, $entry) {
+                        $src = trim($matches[0]);
                         $parts = explode(" ", $src, 2);
                         $newUrl = $singleElementCallback($parts[0], $entry);
                         return join(" ", [$newUrl, $parts[1]]);
@@ -409,14 +407,6 @@ EOT
     /**
      * @throws Minz_PermissionDeniedException
      */
-    private function getCachedSetUrl(array $matches, FreshRSS_Entry $entry): string
-    {
-        return str_replace($matches[1], self::getCachedUrl($matches[1], $entry), $matches[0]);
-    }
-
-    /**
-     * @throws Minz_PermissionDeniedException
-     */
     private function getCachedUrl(string $url, FreshRSS_Entry $entry): string
     {
         $image_cache_url = $this->settings->getImageCacheUrl();
@@ -473,14 +463,6 @@ EOT
             $this->setCachedOnRemote($url);
         }
         return true;
-    }
-
-    /**
-     * @throws Minz_PermissionDeniedException
-     */
-    private function uploadSetUrls(array $matches, FreshRSS_Entry $entry): bool
-    {
-        return self::uploadUrl($matches[1], $entry);
     }
 
     /**
