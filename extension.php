@@ -230,9 +230,9 @@ EOT
                             $result = array_filter($result);
                             if ($result) {
                                 $newSrcSet = join(", ", $result);
-//                                $image->setAttribute("previous-srcset", $srcSet);
-//                                $image->setAttribute("srcset", $newSrcSet);
-//                                $this->addDefaultImageAttributes($image);
+                                $image->setAttribute("previous-srcset", $srcSet);
+                                $image->setAttribute("srcset", $newSrcSet);
+                                $this->addDefaultImageAttributes($image);
                                 Minz_Log::notice("ImageCache[$callSource]: Replaced with $newSrcSet");
                             } else {
                                 Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set");
