@@ -214,10 +214,10 @@ EOT
 
                     $srcSet = $image->getAttribute("srcset");
                     Minz_Log::notice("ImageCache[$callSource]: Found image set $srcSet");
-//                    if (is_string($srcSet)) {
-//                        $srcSet = explode(",", $srcSet);
-//                    }
-//
+                    if (is_string($srcSet)) {
+                        $srcSet = explode(",", $srcSet);
+                    }
+
 //                    $result = preg_replace_callback("/[^\s,]+\s*\s+\d+[wx]/", $elementSetCall, $srcSet);
 //                    if ($result === null) {
 //                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a null result");
