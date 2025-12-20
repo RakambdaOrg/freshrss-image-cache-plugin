@@ -205,15 +205,15 @@ EOT
                 }
 
                 if ($image->hasAttribute("srcset")) {
-//                    $elementSetCall = function ($matches) use ($singleElementCallback, $entry) {
-//                        $src = trim($matches[0]);
-//                        $parts = explode(" ", $src, 2);
-//                        $newUrl = $singleElementCallback($parts[0], $entry);
-//                        return join(" ", [$newUrl, $parts[1]]);
-//                    };
-//
-//                    $srcSet = $image->getAttribute("srcset");
-//                    Minz_Log::notice("ImageCache[$callSource]: Found image set $srcSet");
+                    $elementSetCall = function ($matches) use ($singleElementCallback, $entry) {
+                        $src = trim($matches[0]);
+                        $parts = explode(" ", $src, 2);
+                        $newUrl = $singleElementCallback($parts[0], $entry);
+                        return join(" ", [$newUrl, $parts[1]]);
+                    };
+
+                    $srcSet = $image->getAttribute("srcset");
+                    Minz_Log::notice("ImageCache[$callSource]: Found image set $srcSet");
 //                    if (is_string($srcSet)) {
 //                        $srcSet = explode(",", $srcSet);
 //                    }
