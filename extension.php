@@ -222,11 +222,11 @@ EOT
                     if ($result === null) {
                         Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a null result");
                     } else {
-//                        if (is_string($result)) {
-//                            $result = [$result];
-//                        }
-//
-//                        if (is_array($result)) {
+                        if (is_string($result)) {
+                            $result = [$result];
+                        }
+
+                        if (is_array($result)) {
 //                            $result = array_filter($result);
 //                            if ($result) {
 //                                $newSrcSet = join(", ", $result);
@@ -237,9 +237,9 @@ EOT
 //                            } else {
 //                                Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set");
 //                            }
-//                        } else {
-//                            Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a non array result");
-//                        }
+                        } else {
+                            Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a non array result");
+                        }
                     }
                 }
             }
