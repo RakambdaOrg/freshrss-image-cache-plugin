@@ -218,7 +218,7 @@ EOT
                         $srcSet = explode(",", $srcSet);
                     }
 
-                    $result = preg_replace_callback("/[^\s,]+\s*\s+\d+[wx]/", $elementSetCall, $srcSet);
+                    $result = $srcSet;//preg_replace_callback("/[^\s,]+\s*\s+\d+[wx]/", $elementSetCall, $srcSet);
                     if ($result === null) {
                         Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a null result");
                     } else {
@@ -231,7 +231,7 @@ EOT
                             if ($result) {
                                 $newSrcSet = join(", ", $result);
                                 $image->setAttribute("previous-srcset", $srcSet);
-                                //$image->setAttribute("srcset", $newSrcSet);
+                                $image->setAttribute("srcset", $newSrcSet);
                                 $this->addDefaultImageAttributes($image);
                                 Minz_Log::notice("ImageCache[$callSource]: Replaced with $newSrcSet");
                             } else {
