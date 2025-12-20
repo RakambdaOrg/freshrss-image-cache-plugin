@@ -204,7 +204,7 @@ EOT
                     }
                 }
 
-                if (false && $image->hasAttribute("srcset")) {
+                if ($image->hasAttribute("srcset")) {
                     $elementSetCall = function ($matches) use ($singleElementCallback, $entry) {
                         $src = trim($matches[0]);
                         $parts = explode(" ", $src, 2);
@@ -229,10 +229,11 @@ EOT
                         if (is_array($result)) {
                             $result = array_filter($result);
                             if ($result) {
+                                $newSrcSet = join(", ", $result);
                                 $image->setAttribute("previous-srcset", $srcSet);
-                                $image->setAttribute("srcset", join(", ", $result));
+                                //$image->setAttribute("srcset", $newSrcSet);
                                 $this->addDefaultImageAttributes($image);
-                                Minz_Log::notice("ImageCache[$callSource]: Replaced with $result");
+                                Minz_Log::notice("ImageCache[$callSource]: Replaced with $newSrcSet");
                             } else {
                                 Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set");
                             }
