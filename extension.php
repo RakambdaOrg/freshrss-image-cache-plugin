@@ -172,7 +172,7 @@ EOT
      */
     private function handleImages(DOMDocument $doc, FreshRSS_Entry $entry, string $callSource, callable $singleElementCallback, callable $elementSetCallback): void
     {
-        Minz_Log::debug("ImageCache[$callSource]: Scanning new document");
+        Minz_Log::notice("ImageCache[$callSource]: Scanning new document");
 
         $images = $doc->getElementsByTagName("img");
         $videos = $doc->getElementsByTagName("video");
@@ -183,17 +183,17 @@ EOT
                 if ($image->hasAttribute("src")) {
                     $src = $image->getAttribute("src");
                     if ($this->isDisabled($src)) {
-                        Minz_Log::debug("ImageCache[$callSource]: Found disabled image $src");
+                        Minz_Log::notice("ImageCache[$callSource]: Found disabled image $src");
                         continue;
                     }
 
-                    Minz_Log::debug("ImageCache[$callSource]: Found image $src");
+                    Minz_Log::notice("ImageCache[$callSource]: Found image $src");
                     $result = $singleElementCallback($src, $entry);
                     if ($result) {
                         $image->setAttribute("previous-src", $src);
                         $image->setAttribute("src", $result);
                         $this->addDefaultImageAttributes($image);
-                        Minz_Log::debug("ImageCache[$callSource]: Replaced image with $result");
+                        Minz_Log::notice("ImageCache[$callSource]: Replaced image with $result");
 
                         if ($this->isVideoLink($src)) {
                             $this->appendVideo($doc, $image, $src, $result);
@@ -202,15 +202,16 @@ EOT
                             }
                         }
                     } else {
-                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing image");
+                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing image");
                     }
                 }
+
                 if ($image->hasAttribute("srcset")) {
                     $elementSetCall = function ($src) use ($elementSetCallback, $entry) {
                         return $elementSetCallback($src, $entry);
                     };
                     $srcSet = $image->getAttribute("srcset");
-                    Minz_Log::debug("ImageCache[$callSource]: Found image set $srcSet");
+                    Minz_Log::notice("ImageCache[$callSource]: Found image set $srcSet");
                     /** @noinspection RegExpUnnecessaryNonCapturingGroup */
                     $result = preg_replace_callback("/(?:([^\s,]+)(\s*(?:\s+\d+[wx])(?:,\s*)?))/", $elementSetCall, $srcSet);
 
@@ -225,53 +226,53 @@ EOT
                             $image->setAttribute("srcset", $result);
                             $this->addDefaultImageAttributes($image);
                             /** @noinspection PhpArrayToStringConversionInspection */
-                            Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
+                            Minz_Log::notice("ImageCache[$callSource]: Replaced with $result");
                         } else {
-                            Minz_Log::debug("ImageCache[$callSource]: Failed replacing image set");
+                            Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set");
                         }
                     } else {
-                        Minz_Log::error("ImageCache[$callSource]: Failed replacing image set, got a non array result");
+                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a non array result");
                     }
                 }
             }
 
             foreach ($videos as $video) {
-                Minz_Log::debug("ImageCache[$callSource]: Found video");
+                Minz_Log::notice("ImageCache[$callSource]: Found video");
 
                 if ($video->hasAttribute("src")) {
                     $src = $video->getAttribute("src");
                     if ($this->isDisabled($src)) {
-                        Minz_Log::debug("ImageCache[$callSource]: Found disabled video $src");
+                        Minz_Log::notice("ImageCache[$callSource]: Found disabled video $src");
                         continue;
                     }
 
-                    Minz_Log::debug("ImageCache[$callSource]: Found video src $src");
+                    Minz_Log::notice("ImageCache[$callSource]: Found video src $src");
                     $result = $singleElementCallback($src, $entry);
                     if ($result) {
                         $video->setAttribute("previous-src", $src);
                         $video->setAttribute("src", $result);
                         $this->addDefaultVideoAttributes($video);
-                        Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
+                        Minz_Log::notice("ImageCache[$callSource]: Replaced with $result");
                     } else {
-                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing video src");
+                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing video src");
                     }
                 }
 
                 if ($video->hasAttribute("poster")) {
                     $poster = $video->getAttribute("poster");
                     if ($this->isDisabled($poster)) {
-                        Minz_Log::debug("ImageCache[$callSource]: Found disabled video poster $poster");
+                        Minz_Log::notice("ImageCache[$callSource]: Found disabled video poster $poster");
                         continue;
                     }
 
-                    Minz_Log::debug("ImageCache[$callSource]: Found video poster $poster");
+                    Minz_Log::notice("ImageCache[$callSource]: Found video poster $poster");
                     $result = $singleElementCallback($poster, $entry);
                     if ($result) {
                         $video->setAttribute("previous-poster", $poster);
                         $video->setAttribute("poster", $result);
-                        Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
+                        Minz_Log::notice("ImageCache[$callSource]: Replaced with $result");
                     } else {
-                        Minz_Log::debug("ImageCache[$callSource]: Failed replacing video poster");
+                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing video poster");
                     }
                 }
 
@@ -283,11 +284,11 @@ EOT
 
                         $src = $source->getAttribute("src");
                         if ($this->isDisabled($src)) {
-                            Minz_Log::debug("ImageCache[$callSource]: Found disabled video $src");
+                            Minz_Log::notice("ImageCache[$callSource]: Found disabled video $src");
                             continue;
                         }
 
-                        Minz_Log::debug("ImageCache[$callSource]: Found video source $src");
+                        Minz_Log::notice("ImageCache[$callSource]: Found video source $src");
                         $result = $singleElementCallback($src, $entry);
                         if ($result) {
                             $source->setAttribute("previous-src", $src);
@@ -295,9 +296,9 @@ EOT
                             $this->overrideVideoSourceAttributes($source);
                             $this->addDefaultVideoAttributes($video);
                             $this->addClass($video, "cache-image");
-                            Minz_Log::debug("ImageCache[$callSource]: Replaced with $result");
+                            Minz_Log::notice("ImageCache[$callSource]: Replaced with $result");
                         } else {
-                            Minz_Log::debug("ImageCache[$callSource]: Failed replacing video source");
+                            Minz_Log::warning("ImageCache[$callSource]: Failed replacing video source");
                         }
                     }
                 }
@@ -310,18 +311,18 @@ EOT
                 $href = $link->getAttribute("href");
 
                 if (!$this->isImageLink($href) && !$this->isVideoLink($href)) {
-                    Minz_Log::debug("ImageCache[$callSource]: Found skipped link $href");
+                    Minz_Log::notice("ImageCache[$callSource]: Found skipped link $href");
                     continue;
                 }
                 if ($this->isDisabled($href)) {
-                    Minz_Log::debug("ImageCache[$callSource]: Found disabled link $href");
+                    Minz_Log::notice("ImageCache[$callSource]: Found disabled link $href");
                     continue;
                 }
 
-                Minz_Log::debug("ImageCache[$callSource]: Found link $href");
+                Minz_Log::notice("ImageCache[$callSource]: Found link $href");
                 $result = $singleElementCallback($href, $entry);
                 if (!$result) {
-                    Minz_Log::debug("ImageCache[$callSource]: Failed replacing link");
+                    Minz_Log::notice("ImageCache[$callSource]: Failed replacing link");
                     continue;
                 }
 
@@ -335,7 +336,7 @@ EOT
             Minz_Log::error("ImageCache[$callSource]: Unhandled exception, failed to handle images $e");
         }
 
-        Minz_Log::debug("ImageCache[$callSource]: Done scanning document");
+        Minz_Log::notice("ImageCache[$callSource]: Done scanning document");
     }
 
     private function addClass(DOMElement $node, string $clazz): void
@@ -358,7 +359,7 @@ EOT
             $this->addDefaultImageAttributes($image);
 
             $this->appendAfter($node, $this->wrapElement($doc, $image));
-            Minz_Log::debug("[ImageCache]: Added image link with $originalLink => $newLink");
+            Minz_Log::notice("[ImageCache]: Added image link with $originalLink => $newLink");
         } catch (Exception $e) {
             Minz_Log::error("[ImageCache]: Failed to create new DOM element $e");
         }
@@ -380,7 +381,7 @@ EOT
             $video->appendChild($source);
 
             $this->appendAfter($node, $this->wrapElement($doc, $video));
-            Minz_Log::debug("[ImageCache]: Added video link with $originalLink => $newLink");
+            Minz_Log::notice("[ImageCache]: Added video link with $originalLink => $newLink");
         } catch (Exception $e) {
             Minz_Log::error("[ImageCache]: Failed to create new DOM element $e");
         }
@@ -411,11 +412,11 @@ EOT
     {
         $image_cache_url = $this->settings->getImageCacheUrl();
         if (str_starts_with($url, $image_cache_url)) {
-            Minz_Log::debug("ImageCache: URL $url already starts with $image_cache_url");
+            Minz_Log::notice("ImageCache: URL $url already starts with $image_cache_url");
             return $url;
         }
         if ($this->isRecache($url) && !$this->isUrlCached($url, $entry)) {
-            Minz_Log::debug("ImageCache: Re-caching $url");
+            Minz_Log::notice("ImageCache: Re-caching $url");
             $this->uploadUrl($url, $entry);
         }
 
@@ -479,7 +480,7 @@ EOT
     private function uploadUrl(string $to_cache_cache_url, FreshRSS_Entry $entry): bool
     {
         if ($this->isCachedOnRemote($to_cache_cache_url)) {
-            Minz_Log::debug("ImageCache: URL $to_cache_cache_url is already cached on remote");
+            Minz_Log::notice("ImageCache: URL $to_cache_cache_url is already cached on remote");
             return true;
         }
         $max_tries = 1 + $this->settings->getUploadRetryCount();
@@ -489,7 +490,7 @@ EOT
                     "origin" => $this->safe_encode_base64($entry->link()),
                     "authors" => $this->safe_encode_base64(json_encode($entry->authors())),
             ]);
-            Minz_Log::debug("ImageCache: Try $i, $to_cache_cache_url cache result : $cached");
+            Minz_Log::notice("ImageCache: Try $i, $to_cache_cache_url cache result : $cached");
             if ($cached) {
                 if ($this->isRecache($to_cache_cache_url)) {
                     $this->setCachedOnRemote($to_cache_cache_url);
@@ -541,7 +542,7 @@ EOT
         $response = curl_exec($curl);
         curl_close($curl);
 
-        Minz_Log::debug("ImageCache: Upload response : $response");
+        Minz_Log::notice("ImageCache: Upload response : $response");
         if (!$response) {
             return false;
         }
