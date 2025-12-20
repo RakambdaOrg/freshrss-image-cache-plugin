@@ -218,10 +218,10 @@ EOT
                         $srcSet = explode(",", $srcSet);
                     }
 
-//                    $result = preg_replace_callback("/[^\s,]+\s*\s+\d+[wx]/", $elementSetCall, $srcSet);
-//                    if ($result === null) {
-//                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a null result");
-//                    } else {
+                    $result = preg_replace_callback("/[^\s,]+\s*\s+\d+[wx]/", $elementSetCall, $srcSet);
+                    if ($result === null) {
+                        Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a null result");
+                    } else {
 //                        if (is_string($result)) {
 //                            $result = [$result];
 //                        }
@@ -240,7 +240,7 @@ EOT
 //                        } else {
 //                            Minz_Log::warning("ImageCache[$callSource]: Failed replacing image set, got a non array result");
 //                        }
-//                    }
+                    }
                 }
             }
 
