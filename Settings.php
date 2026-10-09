@@ -2,6 +2,8 @@
 
 namespace ImageCache;
 
+use Minz_Extension;
+
 class Settings
 {
     const DEFAULT_CACHE_URL = "https://example.com/pic";
@@ -14,38 +16,26 @@ class Settings
     const DEFAULT_MAX_CACHE_ELEMENTS = 5000;
     const DEFAULT_REMOVE_WRONG_TAG = false;
 
-    private array $settings;
+    private Minz_Extension $settingsProvider;
 
-    public function __construct(array $settings)
+    public function __construct(Minz_Extension $settingsProvider)
     {
-        $this->settings = $settings;
+        $this->settingsProvider = $settingsProvider;
     }
 
     public function getImageCacheUrl(): string
     {
-        if (array_key_exists('image_cache_url', $this->settings)) {
-            return (string)$this->settings['image_cache_url'];
-        }
-
-        return self::DEFAULT_CACHE_URL;
+        return $this->settingsProvider->getUserConfigurationString('image_cache_url') ?? self::DEFAULT_CACHE_URL;
     }
 
     public function getInternalImageCacheUrl(): string
     {
-        if (array_key_exists('internal_image_cache_url', $this->settings)) {
-            return (string)$this->settings['internal_image_cache_url'];
-        }
-
-        return $this->getImageCacheUrl();
+        return $this->settingsProvider->getUserConfigurationString('internal_image_cache_url') ?? $this->getImageCacheUrl();
     }
 
     public function getImageCacheAccessToken(): string
     {
-        if (array_key_exists('image_cache_access_token', $this->settings)) {
-            return (string)$this->settings['image_cache_access_token'];
-        }
-
-        return self::DEFAULT_CACHE_ACCESS_TOKEN;
+        return $this->settingsProvider->getUserConfigurationString('image_cache_access_token') ?? self::DEFAULT_CACHE_ACCESS_TOKEN;
     }
 
     /**
@@ -53,11 +43,7 @@ class Settings
      */
     public function getImageDisabledUrl(): array
     {
-        if (array_key_exists('image_cache_disabled_url', $this->settings)) {
-            return $this->splitEntries((string)$this->settings['image_cache_disabled_url']);
-        }
-
-        return $this->splitEntries(self::DEFAULT_CACHE_DISABLED_URL);
+        return $this->splitEntries($this->settingsProvider->getUserConfigurationString('image_cache_disabled_url') ?? self::DEFAULT_CACHE_URL);
     }
 
     /**
@@ -65,56 +51,32 @@ class Settings
      */
     public function getImageRecacheUrl(): array
     {
-        if (array_key_exists('image_recache_url', $this->settings)) {
-            return $this->splitEntries((string)$this->settings['image_recache_url']);
-        }
-
-        return $this->splitEntries(self::DEFAULT_RECACHE_URL);
+        return $this->splitEntries($this->settingsProvider->getUserConfigurationString('image_recache_url') ?? self::DEFAULT_RECACHE_URL);
     }
 
     public function getVideoDefaultVolume(): float
     {
-        if (array_key_exists('video_default_volume', $this->settings)) {
-            return (float)$this->settings['video_default_volume'];
-        }
-
-        return self::DEFAULT_VIDEO_VOLUME;
+        return $this->settingsProvider->getUserConfigurationInt('video_default_volume') ?? self::DEFAULT_VIDEO_VOLUME;
     }
 
     public function getUploadRetryCount(): int
     {
-        if (array_key_exists('upload_retry_count', $this->settings)) {
-            return (int)$this->settings['upload_retry_count'];
-        }
-
-        return self::DEFAULT_UPLOAD_RETRY_COUNT;
+        return $this->settingsProvider->getUserConfigurationInt('upload_retry_count') ?? self::DEFAULT_UPLOAD_RETRY_COUNT;
     }
 
     public function getUploadRetryDelay(): int
     {
-        if (array_key_exists('upload_retry_delay', $this->settings)) {
-            return (int)$this->settings['upload_retry_delay'];
-        }
-
-        return self::DEFAULT_UPLOAD_RETRY_DELAY;
+        return $this->settingsProvider->getUserConfigurationInt('upload_retry_delay') ?? self::DEFAULT_UPLOAD_RETRY_DELAY;
     }
 
     public function getMaxCacheElements(): int
     {
-        if (array_key_exists('max_cache_elements', $this->settings)) {
-            return (int)$this->settings['max_cache_elements'];
-        }
-
-        return self::DEFAULT_MAX_CACHE_ELEMENTS;
+        return $this->settingsProvider->getUserConfigurationInt('max_cache_elements') ?? self::DEFAULT_MAX_CACHE_ELEMENTS;
     }
 
     public function isRemoveWrongTag(): bool
     {
-        if (array_key_exists('remove_wrong_tag', $this->settings)) {
-            return (bool)$this->settings['remove_wrong_tag'];
-        }
-
-        return self::DEFAULT_REMOVE_WRONG_TAG;
+        return $this->settingsProvider->getUserConfigurationBool('remove_wrong_tag') ?? self::DEFAULT_REMOVE_WRONG_TAG;
     }
 
     /**

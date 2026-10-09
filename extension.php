@@ -20,7 +20,7 @@ class ImageCacheExtension extends Minz_Extension
     {
         spl_autoload_register([$this, 'autoload']);
 
-        $this->settings = new Settings($this->getUserConfiguration());
+        $this->settings = new Settings($this);
 
         $this->registerTranslates();
         $this->registerCss();
@@ -78,18 +78,15 @@ EOT
         $this->registerTranslates();
 
         if (Minz_Request::isPost()) {
-            $configuration = [
-                    'image_cache_url' => Minz_Request::paramString('image_cache_url'),
-                    'internal_image_cache_url' => Minz_Request::paramString('internal_image_cache_url'),
-                    'image_cache_access_token' => Minz_Request::paramString('image_cache_access_token'),
-                    'image_cache_disabled_url' => Minz_Request::paramString('image_cache_disabled_url'),
-                    'image_recache_url' => Minz_Request::paramString('image_recache_url'),
-                    'video_default_volume' => Minz_Request::paramString('video_default_volume'),
-                    'upload_retry_count' => Minz_Request::paramInt('upload_retry_count'),
-                    'max_cache_elements' => Minz_Request::paramInt('max_cache_elements'),
-                    'remove_wrong_tag' => Minz_Request::paramBoolean('remove_wrong_tag'),
-            ];
-            $this->setUserConfiguration($configuration);
+            $this->setUserConfigurationValue('image_cache_url', Minz_Request::paramString('image_cache_url'));
+            $this->setUserConfigurationValue('internal_image_cache_url', Minz_Request::paramString('internal_image_cache_url'));
+            $this->setUserConfigurationValue('image_cache_access_token', Minz_Request::paramString('image_cache_access_token'));
+            $this->setUserConfigurationValue('image_cache_disabled_url', Minz_Request::paramString('image_cache_disabled_url'));
+            $this->setUserConfigurationValue('image_recache_url', Minz_Request::paramString('image_recache_url'));
+            $this->setUserConfigurationValue('video_default_volume', Minz_Request::paramInt('video_default_volume'));
+            $this->setUserConfigurationValue('upload_retry_count', Minz_Request::paramInt('upload_retry_count'));
+            $this->setUserConfigurationValue('max_cache_elements', Minz_Request::paramInt('max_cache_elements'));
+            $this->setUserConfigurationValue('remove_wrong_tag', Minz_Request::paramBoolean('remove_wrong_tag'));
         }
     }
 
@@ -153,7 +150,10 @@ EOT
         );
     }
 
-    /** @noinspection PhpReturnValueOfMethodIsNeverUsedInspection */
+    /**
+     * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
+     * @throws DOMException
+     */
     private function appendAfter(DOMNode $node, DOMNode $add): DOMNode|false
     {
         try {
@@ -348,6 +348,9 @@ EOT
         Minz_Log::notice("ImageCache[$callSource]: Done scanning document");
     }
 
+    /**
+     * @throws DOMException
+     */
     private function addClass(DOMElement $node, string $clazz): void
     {
         $previous = $node->getAttribute('class');
@@ -637,12 +640,18 @@ EOT
         return max(0, min(1, $this->settings->getVideoDefaultVolume()));
     }
 
+    /**
+     * @throws DOMException
+     */
     private function addDefaultImageAttributes(DOMElement $image): void
     {
         $this->addClass($image, "cache-image");
         $this->addClass($image, "reddit-image");
     }
 
+    /**
+     * @throws DOMException
+     */
     private function addDefaultVideoAttributes(DOMElement $video): void
     {
         $this->addClass($video, "cache-image");
@@ -664,6 +673,9 @@ EOT
         }
     }
 
+    /**
+     * @throws DOMException
+     */
     private function overrideVideoSourceAttributes(DOMElement $source): void
     {
         if ($source->hasAttribute("type")) {
